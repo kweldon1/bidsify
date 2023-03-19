@@ -135,17 +135,45 @@ if os.path.exists(dicom_dir):
             
             
             #turns out some images don't have EchoNumbers, use afni's dicom_hinfo to help
-            tagToCheck = '0018,0086' #EchoNumbers tag
-            cmd = 'dicom_hinfo -tag %s %s' \
-                %(tagToCheck, lastDcmPath)                            
-                #print('*******', cond)
-            tag = run_shell_cmd(cmd)
-            #print(tag)
-            if tag == None:
-                nEc = ''
+            if 'XA' in ds.SoftwareVersions:
+                print('XA system, checking echo number the hard way')
+                a = ds
+                # writing to file
+                file1 = open('myfile.txt', 'w')
+                file1.writelines(str(a))
+                file1.close()
+                  
+                # Using readlines()
+                file1 = open('myfile.txt', 'r')
+                lines = file1.readlines()
+                for line in lines:
+                    if "0021, 1106" in line:
+                        mine = line
+                        #print(mine)
+                        break
+                for item in mine:
+                    if item == 'X':
+                        index = mine.index(item)
+                        #print(index)
+                        nEc = mine[index+2]
+                #delete the stupid file
+                cmd = 'rm %s' %'myfile.txt'
+                run_shell_cmd(cmd)
             else:
-                EchoNumbers = ds.EchoNumber
-                nEc = ds.EchoNumbers   
+                nEc = ds.EchoNumbers
+            
+
+            # tagToCheck = '0018,0086' #EchoNumbers tag
+            # cmd = 'dicom_hinfo -tag %s %s' \
+            #     %(tagToCheck, lastDcmPath)                            
+            #     #print('*******', cond)
+            # tag = run_shell_cmd(cmd)
+            # #print(tag)
+            # if tag == None:
+            #     nEc = ''
+            # else:
+            #     EchoNumbers = ds.EchoNumber
+            #     nEc = ds.EchoNumbers   
                 
             #print(name, label, ImageType, nEc)    
             if subdir_contents:
