@@ -114,7 +114,8 @@ if os.path.exists(dicom_dir):
     # first, get a list of directories that actually have dicom files
     for iF in range(len(files)):
         subdir = os.path.join(dicom_dir, files[iF])
-        if os.path.isdir(subdir):
+        name = os.path.split(subdir)[1]
+        if os.path.isdir(subdir) and name.startswith('MR'):
             #print(subdir)
             subdir_contents = glob.glob(os.path.join(subdir, 'MR*.dcm'))
             subdir_contents.sort()
