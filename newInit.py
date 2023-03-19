@@ -116,7 +116,7 @@ if os.path.exists(dicom_dir):
         subdir = os.path.join(dicom_dir, files[iF])
         if os.path.isdir(subdir):
             #print(subdir)
-            subdir_contents = glob.glob(os.path.join(subdir, '*.dcm'))
+            subdir_contents = glob.glob(os.path.join(subdir, 'MR*.dcm'))
             subdir_contents.sort()
             lastDcmPath = subdir_contents[-1]
             print(lastDcmPath)
