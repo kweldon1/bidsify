@@ -43,42 +43,43 @@ def run_shell_cmd(cmd):
 #%%       
 #mainDir = '/home/faird/kweldon/scratch/template/data/'
 #FOR TESTING
-mainDir = '/home/znahas/shared/analysis/PCS/'
-dicoms = 'PCS_HR6945_001'
-dicomPath = os.path.join(mainDir,dicoms)
+# mainDir = '/home/znahas/shared/analysis/PCS/'
+# dicoms = 'PCS_HR6945_001'
+# dicomPath = os.path.join(mainDir,dicoms)
+# subID = ''
+# sess = ''
+# bids = 'bids'
+# discard = ''
+
 #%%
-# parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
-# parser.add_argument("-d", "--dicomDir", help="Dicom directory path")
-# parser.add_argument("-p", "--participantID", help="subID")
-# parser.add_argument("-s", "--sess", help="sess")
-# parser.add_argument("-b", "--bids", help="bids output directory")
-# parser.add_argument("-n", "--discardTRs", help="how many TRs to discard (e.g. 3 for 3 noise scans")
+parser.add_argument("-d", "--dicomDir", help="Dicom directory path")
+parser.add_argument("-p", "--participantID", help="subID")
+parser.add_argument("-s", "--sess", help="sess")
+parser.add_argument("-b", "--bids", help="bids output directory")
+parser.add_argument("-n", "--discardTRs", help="how many TRs to discard (e.g. 3 for 3 noise scans")
 
-# args = parser.parse_args()
+args = parser.parse_args()
     
-# if args.participantID:
-#     subID = args.participantID
-# else:
-#     subID = ''
-# if args.participantID:
-#     sess = args.sess
-# else:
-#     sess = ''
-# if args.bids:
-#     bids = args.bids
-# else:
-#     bids = 'bids' 
-# if args.discardTRs:
-#     discard = int(args.discardTRs)
-# else:
-#     discard = 0     
-#dicomPath = args.dicomDir
+if args.participantID:
+    subID = args.participantID
+else:
+    subID = ''
+if args.participantID:
+    sess = args.sess
+else:
+    sess = ''
+if args.bids:
+    bids = args.bids
+else:
+    bids = 'bids' 
+if args.discardTRs:
+    discard = int(args.discardTRs)
+else:
+    discard = 0     
+dicomPath = args.dicomDir
     
-subID = ''
-sess = ''
-bids = 'bids'
-discard = ''
 mainDir = os.getcwd()
 sessName = os.path.split(dicomPath)[1] + '.py'
 
