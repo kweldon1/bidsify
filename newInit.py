@@ -34,12 +34,12 @@ Usage Example:
 #import pydicom
 import os, datetime, glob, getpass, argparse
 from pydicom import dcmread
-#import nibabel.nicom.csareader as csareader
 
-# try:
-#     dir = sys.argv[1]
-# except:
-#     dir = os.path.split
+def run_shell_cmd(cmd):
+    import subprocess as sub
+    pipe = sub.Popen(cmd,shell=True,stdout=sub.PIPE,stderr=sub.PIPE,close_fds=True)
+    o,e = pipe.communicate()
+    return 
 #%%    
 #mainDir = '/home/faird/kweldon/scratch/template/data/'
 parser = argparse.ArgumentParser()
@@ -131,10 +131,23 @@ if os.path.exists(dicom_dir):
             label = ''
             nTRs = len(subdir_contents)
             ImageType = ds.ImageType
-            nEc = ds.EchoNumbers
             acqNum = name[5:8] + '*'
-            #print(name, label, ImageType, nEc)
             
+            
+            #turns out some images don't have EchoNumbers, use afni's dicom_hinfo to help
+            tagToCheck = '0018,0086' #EchoNumbers tag
+            cmd = 'dicom_hinfo -tag %s %s' \
+                %(tagToCheck, lastDcmPath)                            
+                #print('*******', cond)
+            tag = run_shell_cmd(cmd)
+            #print(tag)
+            if tag == None:
+                EchoNumbers = ''
+            else:
+                EchoNumbers = ds.EchoNumber
+                nEc = ds.EchoNumbers   
+                
+            #print(name, label, ImageType, nEc)    
             if subdir_contents:
                 dcmList.append({'Name': name,
                                 'acqNum': acqNum,
