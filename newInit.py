@@ -119,7 +119,7 @@ if os.path.exists(dicom_dir):
             subdir_contents = glob.glob(os.path.join(subdir, '*.dcm'))
             subdir_contents.sort()
             lastDcmPath = subdir_contents[-1]
-            #print(lastDcmPath)
+            print(lastDcmPath)
             lastDcm = os.path.split(subdir_contents[-1])[1]
             ds = dcmread(lastDcmPath)
             #DcmPath = subdir_contents[0]
