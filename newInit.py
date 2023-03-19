@@ -40,50 +40,59 @@ def run_shell_cmd(cmd):
     pipe = sub.Popen(cmd,shell=True,stdout=sub.PIPE,stderr=sub.PIPE,close_fds=True)
     o,e = pipe.communicate()
     return 
-#%%    
+#%%       
 #mainDir = '/home/faird/kweldon/scratch/template/data/'
-parser = argparse.ArgumentParser()
+#FOR TESTING
+mainDir = '/home/znahas/shared/analysis/PCS/'
+dicoms = 'PCS_HR6945_001'
+dicomPath = os.path.join(mainDir,dicoms)
+#%%
+# parser = argparse.ArgumentParser()
 
-parser.add_argument("-d", "--dicomDir", help="Dicom directory path")
-parser.add_argument("-p", "--participantID", help="subID")
-parser.add_argument("-s", "--sess", help="sess")
-parser.add_argument("-b", "--bids", help="bids output directory")
-parser.add_argument("-n", "--discardTRs", help="how many TRs to discard (e.g. 3 for 3 noise scans")
+# parser.add_argument("-d", "--dicomDir", help="Dicom directory path")
+# parser.add_argument("-p", "--participantID", help="subID")
+# parser.add_argument("-s", "--sess", help="sess")
+# parser.add_argument("-b", "--bids", help="bids output directory")
+# parser.add_argument("-n", "--discardTRs", help="how many TRs to discard (e.g. 3 for 3 noise scans")
 
-args = parser.parse_args()
+# args = parser.parse_args()
     
-if args.participantID:
-    subID = args.participantID
-else:
-    subID = ''
-if args.participantID:
-    sess = args.sess
-else:
-    sess = ''
-if args.bids:
-    bids = args.bids
-else:
-    bids = 'bids' 
-if args.discardTRs:
-    discard = int(args.discardTRs)
-else:
-    discard = 0     
+# if args.participantID:
+#     subID = args.participantID
+# else:
+#     subID = ''
+# if args.participantID:
+#     sess = args.sess
+# else:
+#     sess = ''
+# if args.bids:
+#     bids = args.bids
+# else:
+#     bids = 'bids' 
+# if args.discardTRs:
+#     discard = int(args.discardTRs)
+# else:
+#     discard = 0     
+#dicomPath = args.dicomDir
     
-sessDir = os.getcwd()
-dicomPath = args.dicomDir
+subID = ''
+sess = ''
+bids = 'bids'
+discard = ''
+mainDir = os.getcwd()
 sessName = os.path.split(dicomPath)[1] + '.py'
 
 #%%
 print('Reading from dicom dir: ', dicomPath)
-print('Creating (or overwriting) ', sessName, ' summary in ', sessDir)
+print('Creating (or overwriting) ', sessName, ' summary in ', mainDir)
 
-
-fid = open(os.path.join(sessDir, sessName), 'w')
+filename = os.path.join(mainDir, sessName)
+fid = open(filename, 'w')
 fid.write('# Date analysis initialized '+str(datetime.datetime.now()).split('.')[0]+' by ' +getpass.getuser()+'\n')
   
 fid.write('def dicomList():\n')
 fid.write('\tinfo = {}\n')
-fid.write("\tinfo['studyDir'] = '%s' \n"%sessDir) 
+fid.write("\tinfo['studyDir'] = '%s' \n"%mainDir) 
 fid.write("\tinfo['dicomDir'] = '%s' \n" %dicomPath)
 fid.write("\tinfo['subID'] = %s  \n"%subID)
 fid.write("\tinfo['sess'] = %s # session number in str \n"%sess)
@@ -99,7 +108,8 @@ fid.write('#   t1-epi: [t1_epi, t1epi, t1w_epi, t1wepi]\n')
 fid.write('#   dwi: dwi\n')    
 fid.write('#   afi: afi\n')    
 fid.write('# \n')    
-fid.write('# Notes:  \n\n')     
+fid.write('# Notes:  \n\n')   
+fid.close()  
     
 #%% Figure out which datasets we're working on
 try:
@@ -114,11 +124,11 @@ if os.path.exists(dicom_dir):
     # first, get a list of directories that actually have dicom files
     for iF in range(len(files)):
         subdir = os.path.join(dicom_dir, files[iF])
-        name = os.path.split(subdir)[1]
-        if os.path.isdir(subdir) and name.startswith('MR'):
+        if os.path.isdir(subdir) and os.path.split(subdir)[1].startswith('MR'):
             #print(subdir)
             subdir_contents = glob.glob(os.path.join(subdir, 'MR*.dcm'))
             subdir_contents.sort()
+            print(subdir_contents)
             lastDcmPath = subdir_contents[-1]
             print(lastDcmPath)
             lastDcm = os.path.split(subdir_contents[-1])[1]
@@ -127,25 +137,57 @@ if os.path.exists(dicom_dir):
             #Dcm = os.path.split(subdir_contents[0])[1]
             #ds = dcmread(DcmPath)
             
-
+#%%
             name = files[iF]
             label = ''
             nTRs = len(subdir_contents)
-            ImageType = ds.ImageType
             acqNum = name[5:8] + '*'
+            nEc = ''
+#%%ImageType            
+            #turns out some images don't have ImageType
+            if 'XA' in ds.SoftwareVersions:
+                print('XA system, checking ImageType the hard way')
+                a = ds
+                # writing to file
+                file1 = open('checkIT.txt', 'w')
+                file1.writelines(str(a))
+                file1.close()
+                  
+                # Using readlines()
+                file1 = open('checkIT.txt', 'r')
+                lines = file1.readlines()
+                for line in lines:
+                    if "0021, 1175" in line:
+                        mine = line
+                        print(mine)
+                        break
+                for item in mine:
+                    if item == '[':
+                        startIndex = mine.index(item)
+                    if item == ']':
+                        endIndex = mine.index(item) + 1
+                #print(startIndex, endIndex)
+                ImageType = mine[startIndex:endIndex]
+                #delete the stupid file
+                cmd = 'rm %s' %'checkIT.txt'
+                run_shell_cmd(cmd)
+            else:
+                ImageType = ds.ImageType
             
+
+#%%EchoNumbers            
             
             #turns out some images don't have EchoNumbers, use afni's dicom_hinfo to help
             if 'XA' in ds.SoftwareVersions:
                 print('XA system, checking echo number the hard way')
                 a = ds
                 # writing to file
-                file1 = open('myfile.txt', 'w')
+                file1 = open('checkEN.txt', 'w')
                 file1.writelines(str(a))
                 file1.close()
                   
                 # Using readlines()
-                file1 = open('myfile.txt', 'r')
+                file1 = open('checkEN.txt', 'r')
                 lines = file1.readlines()
                 for line in lines:
                     if "0021, 1106" in line:
@@ -158,7 +200,7 @@ if os.path.exists(dicom_dir):
                         #print(index)
                         nEc = mine[index+2]
                 #delete the stupid file
-                cmd = 'rm %s' %'myfile.txt'
+                cmd = 'rm %s' %'checkEN.txt'
                 run_shell_cmd(cmd)
             else:
                 nEc = ds.EchoNumbers
@@ -187,10 +229,13 @@ if os.path.exists(dicom_dir):
                                 'discardTRs': discard,
                                 })
             
-#print(dcmList)
+print(dcmList)
+#%%
 # now that we've collected all of our information ... write it down
+fid = open(sessName, 'a') 
 fid.write('\t# Raw data DETAILS\n')
 fid.write('\tdcm = []\n')
+#%%
 for dcm in dcmList:
     fid.write("\tdcm.append({'Name': '%s',\n" %dcm['Name'])
     fid.write("\t            'label': '%s',\n" %dcm['label'])
@@ -207,26 +252,19 @@ for dcm in dcmList:
 fid.write("\treturn dcm,info\n")
 fid.write("if __name__ == '__main__':\n")
 fid.write("\tdicomList()\n")
+fid.close()
 
-    
+print('''
+  Now you need to edit that .py file!
+  Instructions:  
 
-# print('''
-#  Now you need to edit that .py file, if you didn't pass a heuristic.json!
-#  Instructions:  
+  Mark which scans should be analyzed by entering a label:
+      the top of .py lists labels that are reserved for
+        marking t1-epi, anat, dwi, afi, and fieldmap (revPE) data
+      anything else gets interpreted as functional data
 
-#  Mark which scans should be analyzed by entering a label:
-#      the top of session_summary.py lists labels that are reserved for
-#         marking t1-epi, anat, dwi, afi, and fieldmap (revPE) data
-#      anything else gets interpreted as functional data
-#      ** if the label ends with _ph, it'll be processed as phase
-#         data and saved in a _ph directory **
-#  Optionally enter True after mocoBase for the scan you want to use 
-#      for motion compensation. Default is last one before PErev.
-#  Optionally use the discardTRs field to indicate how many volumes
-#      should be trimmed off of start or end of scan (to accommodate
-#      steady-state or noise scans)
-#  Optionally enter name of fieldmap (mag part) in info['Fieldmap'] 
-#      and corresponding info on echo spacing and delta TE (always
-#      1.02 for 7T data and 2.46 for 3T data) if you want to compute
-#      voxel displacement maps or do fugue.
-#      ''')
+  Optionally use the discardTRs field to indicate how many volumes
+      should be trimmed off of start or end of scan (to accommodate
+      steady-state or noise scans)
+ 
+      ''')

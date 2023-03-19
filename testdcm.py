@@ -21,10 +21,11 @@ def run_shell_cmd(cmd):
 
 # parser.add_argument("-f", "--file", help="Dicom file")
 # args = parser.parse_args()
-#file = args.file
+# file = args.file
 
-cwd = '/home/znahas/shared/analysis/PCS/'
-file = 'MR-ST006-SE013-0001.dcm'
+#cwd = '/home/znahas/shared/analysis/PCS/'
+cwd = '/home/faird/kweldon/scratch/code/bidsify/testDicoms/'
+file = 'MR-ST006-SE011-0001.dcm'
 path = os.path.join(cwd,file)
 EchoNumbers = ''
 
@@ -32,7 +33,34 @@ EchoNumbers = ''
 print(file)
 #lastDcm = os.path.split(subdir_contents[-1])[1]
 ds = dcmread(path,force=True)
+#ds = dcmread(path,force=True)
 
+
+if 'XA' in ds.SoftwareVersions:
+    print('XA system, checking imagetype the hard way')
+    a = ds
+    # writing to file
+    file1 = open('checkIT.txt', 'w')
+    file1.writelines(str(a))
+    file1.close()
+      
+    # Using readlines()
+    file1 = open('checkIT.txt', 'r')
+    lines = file1.readlines()
+    for line in lines:
+        if "0021, 1175" in line:
+            mine = line
+            print(mine)
+            break
+    # for item in mine:
+    #     if item == 'X':
+    #         index = mine.index(item)
+    #         #print(index)
+    #         nEch = mine[index+2]
+else:
+    nEch = ds.EchoNumbers
+    
+#%%
 if 'XA' in ds.SoftwareVersions:
     print('XA system, checking echo number the hard way')
     a = ds
