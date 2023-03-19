@@ -142,7 +142,7 @@ if os.path.exists(dicom_dir):
             tag = run_shell_cmd(cmd)
             #print(tag)
             if tag == None:
-                EchoNumbers = ''
+                nEc = ''
             else:
                 EchoNumbers = ds.EchoNumber
                 nEc = ds.EchoNumbers   
