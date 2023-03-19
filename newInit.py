@@ -67,7 +67,7 @@ else:
 if args.discardTRs:
     discard = int(args.discardTRs)
 else:
-    dicard = 0     
+    discard = 0     
     
 sessDir = os.getcwd()
 dicomPath = args.dicomDir
