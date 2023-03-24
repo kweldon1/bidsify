@@ -19,7 +19,8 @@ Step 1: newInit.py or initalize.py
             -p: subID
             -s: sess
             -b: name or path to bids folder where these data should live
-            --discardTRs: set # TRs to trim off beginning and end of all func
+            --discardTRs: # NOT ACCURATE - DEFAULTS TO 0
+                        #set TRs to trim off beginning and end of all func 
         
     Outputs:
         .py file in working directory
